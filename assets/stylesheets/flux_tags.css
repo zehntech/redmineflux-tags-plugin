@@ -1,0 +1,851 @@
+/* flux_tags.css
+ * ============================================================================
+ * Standardized per rtg-009
+ * against the Timesheet plugin (tables, action icons, delete confirmation,
+ * buttons, forms) and the Helpdesk plugin (page headings).
+ *
+ * Namespace: every new plugin-owned class here is `rtg-*`. This stylesheet
+ * loads directly (via stylesheet_link_tag) on shared core pages — Issue show,
+ * Project settings, Time Entry forms — not just flux_tags-owned admin pages,
+ * so class names must never collide with another plugin's classes rendered
+ * on the same page. The `--rf-*` custom properties below are the one
+ * deliberate exception: they are kept byte-identical to the Timesheet and
+ * Helpdesk plugins' own token files, per the existing cross-plugin
+ * convention (an unnamespaced --rf-* colliding at :root across plugins is
+ * harmless because the value is always the same).
+ *
+ * Deliberately NOT done here (see rtg-009's Exclusions table):
+ *   - No global `#content` / `body` / bare-element font-family override.
+ *     Helpdesk can force Inter globally because its CSS only loads via a
+ *     controller-gated hook; flux_tags' CSS loads on shared core pages, so
+ *     a blanket font rule here would leak onto core Redmine/other plugins.
+ * ========================================================================= */
+
+:root {
+  --rf-accent: #0094FF;
+  --rf-accent-hover: #0077CC;
+
+  --rf-danger: #dc2626;
+  --rf-danger-hover: #b91c1c;
+  --rf-danger-bg: #fee2e2;
+
+  --rf-text-primary: #111827;
+  --rf-text-secondary: #374151;
+  --rf-text-muted: #6b7280;
+
+  --rf-border: #e5e7eb;
+  --rf-border-input: #d1d5db;
+  --rf-bg-surface: #ffffff;
+  --rf-bg-subtle: #f9fafb;
+
+  --rf-radius-sm: 6px;
+  --rf-radius-md: 10px;
+
+  --rf-space-2: 8px;
+  --rf-space-4: 16px;
+  --rf-space-5: 20px;
+  --rf-space-6: 24px;
+}
+
+/* =========================================================================
+ * PAGE HEADER (Helpdesk pattern — rf_helpdesk_page_header/_title/_subtitle)
+ * ====================================================================== */
+.rtg-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rf-space-4);
+  padding: var(--rf-space-5) var(--rf-space-6);
+  background: var(--rf-bg-surface);
+  border-radius: var(--rf-radius-md);
+  margin-bottom: var(--rf-space-5);
+}
+
+.rtg-page-header-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rtg-page-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--rf-text-primary);
+  line-height: 1.3;
+}
+
+.rtg-page-subtitle {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--rf-text-muted);
+}
+
+.rtg-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* =========================================================================
+ * BUTTONS (Timesheet metrics — 40px standard, 6px radius)
+ * ====================================================================== */
+.rtg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--rf-space-2);
+  height: 40px;
+  padding: 0 20px;
+  border-radius: var(--rf-radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.rtg-btn-primary {
+  background: var(--rf-accent) !important;
+  color: #fff !important;
+}
+
+.rtg-btn-primary:hover {
+  background: var(--rf-accent-hover) !important;
+}
+
+.rtg-btn-secondary {
+  background: #fff;
+  border-color: var(--rf-border-input);
+  color: var(--rf-text-secondary) !important;
+}
+
+.rtg-btn-secondary:hover {
+  background: var(--rf-bg-subtle);
+}
+
+.rtg-btn-danger {
+  background: var(--rf-danger);
+  color: #fff !important;
+}
+
+.rtg-btn-danger:hover {
+  background: var(--rf-danger-hover);
+}
+
+.rtg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rtg-btn:focus-visible {
+  outline: 2px solid var(--rf-accent);
+  outline-offset: 2px;
+}
+
+/* =========================================================================
+ * TABLES (Timesheet's no-zebra modern-table skin — rf_teams_index.css)
+ * ====================================================================== */
+.rtg-table-section {
+  background: var(--rf-bg-surface);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-md);
+  overflow: hidden;
+  margin-top: var(--rf-space-5);
+}
+
+.rtg-table-container {
+  overflow-x: auto;
+}
+
+.rtg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.rtg-table thead {
+  background: var(--rf-bg-subtle);
+}
+
+.rtg-table th {
+  padding: 14px 20px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--rf-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--rf-border);
+}
+
+.rtg-table th.rtg-col-checkbox,
+.rtg-table td.rtg-col-checkbox {
+  width: 36px;
+  text-align: center;
+}
+
+.rtg-table th.rtg-col-actions,
+.rtg-table td.rtg-col-actions {
+  min-width: 120px;
+  text-align: center;
+}
+
+.rtg-table tbody tr {
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.15s;
+}
+
+.rtg-table tbody tr:hover {
+  background: var(--rf-bg-subtle);
+}
+
+.rtg-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.rtg-table td {
+  padding: 14px 20px;
+  color: var(--rf-text-secondary);
+}
+
+/* =========================================================================
+ * ACTION ICONS (Timesheet's .action-icon/.edit-icon/.delete-icon triad)
+ * Layered on top of whatever markup the shared redmineflux_icon_compat gem
+ * renders (icon-font or sprite-SVG) via rf_icon_link — never edited there.
+ * ====================================================================== */
+.rtg-action-buttons {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.rtg-action-icon {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--rf-radius-sm);
+  color: var(--rf-text-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+/* rf_icon_link (redmineflux_icon_compat) has two rendering modes it can't be
+   told to skip:
+   - Sprite mode (rf_sprite_icons_available? true): Redmine core's own
+     sprite_icon(name, label) helper renders the SVG plus a
+     <span class="icon-label">label</span> — the gem never passes Redmine's
+     own icon_only: true, so the label always renders. Hiding just that span
+     (visually, not display:none, so it stays screen-reader-visible) recovers
+     Timesheet's icon-only look without touching the shared gem or Redmine core.
+   - Legacy fallback (no sprite support at all): the link's content is the
+     bare label text with no wrapping span to target, so this button hugs its
+     actual content (min-width, not a fixed 32x32) instead of clipping it. */
+.rtg-action-icon .icon-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.rtg-action-icon:hover {
+  transform: translateY(-1px);
+}
+
+.rtg-edit-icon:hover {
+  background-color: #f0fdf4;
+  color: #15803d;
+}
+
+.rtg-delete-icon:hover {
+  background-color: #fef2f2;
+  color: var(--rf-danger);
+}
+
+/* =========================================================================
+ * EMPTY STATE
+ * ====================================================================== */
+.rtg-empty-state {
+  background: var(--rf-bg-surface);
+  border: 1px solid var(--rf-border);
+  border-radius: var(--rf-radius-md);
+  padding: 60px 20px;
+  margin-top: var(--rf-space-5);
+  text-align: center;
+}
+
+.rtg-empty-state-icon {
+  color: #d1d5db;
+  margin-bottom: 16px;
+}
+
+.rtg-empty-state-icon svg {
+  width: 56px;
+  height: 56px;
+}
+
+.rtg-empty-state h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rf-text-primary);
+}
+
+/* =========================================================================
+ * PAGINATION WRAPPER (restyles Redmine's own will_paginate/renderer markup)
+ * ====================================================================== */
+.rtg-pagination {
+  padding: var(--rf-space-4) var(--rf-space-5);
+  border-top: 1px solid var(--rf-border);
+  background: var(--rf-bg-surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.rtg-pagination ul.pages {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rtg-pagination ul.pages li {
+  display: inline-block;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rtg-pagination ul.pages li a,
+.rtg-pagination ul.pages li span {
+  display: inline-block;
+  padding: 8px 12px;
+  border: 1px solid var(--rf-border-input);
+  border-radius: var(--rf-radius-sm);
+  color: var(--rf-text-secondary);
+  text-decoration: none;
+  transition: all 0.2s;
+  font-size: 14px;
+  min-width: 40px;
+  text-align: center;
+  background: #fff;
+}
+
+.rtg-pagination ul.pages li.page a:hover,
+.rtg-pagination ul.pages li.next a:hover {
+  background: var(--rf-bg-subtle);
+  border-color: #9ca3af;
+}
+
+.rtg-pagination ul.pages li.current span {
+  background: var(--rf-accent);
+  color: #fff;
+  border-color: var(--rf-accent);
+  font-weight: 600;
+}
+
+.rtg-pagination ul.pages li.previous span,
+.rtg-pagination ul.pages li.next a {
+  font-weight: 500;
+}
+
+.rtg-pagination ul.pages li.previous span {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rtg-pagination ul.pages li.spacer span {
+  border: none;
+  background: transparent;
+  min-width: auto;
+  padding: 8px 4px;
+}
+
+.rtg-pagination .items,
+.rtg-pagination .per-page {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-size: 14px;
+  color: var(--rf-text-muted);
+}
+
+.rtg-pagination .per-page .selected {
+  color: var(--rf-accent);
+  font-weight: 600;
+}
+
+.rtg-pagination .per-page a {
+  color: var(--rf-accent);
+  text-decoration: none;
+}
+
+.rtg-pagination .per-page a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================================
+ * DELETE CONFIRMATION MODAL (Timesheet's delete-modal shape)
+ * Relocated from app/views/tags/_settings.html.erb's inline <style> block.
+ * IDs (#tag-overloay, #delete-email-template, #confirm-delete) are unchanged
+ * so assets/javascripts/tags.js's showCustomConfirm/closeDeleteTagModal need
+ * no other call-site changes.
+ * ====================================================================== */
+.rtg-delete-modal-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  display: none;
+  transition: all 0.15s ease-in;
+}
+
+.rtg-delete-modal-overlay.rtg-overlay-visible {
+  opacity: 1;
+  visibility: visible;
+  display: block;
+}
+
+.rtg-delete-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.95);
+  background: #fff;
+  border-radius: 16px;
+  z-index: 1060;
+  max-width: 400px;
+  width: 90%;
+  padding: 40px;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  display: none;
+  transition: all 0.2s ease-in;
+}
+
+.rtg-delete-modal.rtg-modal-visible {
+  opacity: 1;
+  visibility: visible;
+  display: block;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.rtg-delete-icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--rf-danger-bg);
+  color: var(--rf-danger);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 22px;
+}
+
+.rtg-delete-icon-circle svg {
+  width: 32px;
+  height: 32px;
+}
+
+.rtg-delete-modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--rf-text-primary);
+  margin: 0 0 12px;
+}
+
+.rtg-delete-modal-description {
+  font-size: 15px;
+  color: var(--rf-text-muted);
+  line-height: 1.6;
+  margin: 0 0 24px !important;
+  padding: 0px !important;
+}
+
+.rtg-delete-modal-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.rtg-delete-modal-actions .rtg-btn {
+  flex: 1;
+  height: 45px;
+}
+
+/* =========================================================================
+ * RESPONSIVE (standard 768px / 480px breakpoints)
+ * ====================================================================== */
+@media (max-width: 768px) {
+  .rtg-page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .rtg-page-actions {
+    width: 100%;
+  }
+
+  .rtg-table {
+    font-size: 13px;
+  }
+
+  .rtg-table th,
+  .rtg-table td {
+    padding: 10px 12px;
+  }
+
+  .rtg-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .rtg-delete-modal {
+    padding: 24px;
+    width: calc(100vw - 32px);
+  }
+
+  .rtg-delete-modal-actions {
+    flex-direction: column;
+  }
+
+  .rtg-delete-modal-actions .rtg-btn {
+    height: 40px;
+  }
+
+  .tag_box {
+    display: block;
+    width: 100% !important;
+    margin: 0px !important;
+  }
+
+  .tagedit_button {
+    flex-direction: column;
+    gap: 2px !important;
+  }
+}
+
+/* =========================================================================
+ * LEGACY / SHARED RULES (context menu, tag cloud, tag-it overrides, RTL)
+ * ====================================================================== */
+.controller-settings.action-plugin #context-menu {
+  position: absolute;
+  z-index: 40;
+  font-size: 0.9em;
+}
+
+.controller-settings.action-plugin #context-menu li {
+  position: relative;
+  padding-left: 15px;
+  z-index: 39;
+  border: 1px solid white;
+  list-style-type: none;
+}
+
+.controller-settings.action-plugin #context-menu ul {
+  cursor: pointer;
+  width: 100px;
+  border: 1px solid #ccc;
+  background: white;
+  list-style: none;
+  padding: 2px;
+  border-radius: 2px;
+}
+
+.controller-settings.action-plugin #context-menu li .icon-del {
+  background-position: left;
+}
+
+ul.tags {
+  list-style: none;
+  padding: 0px;
+}
+
+ul.tags li {
+  margin: .25em 0px;
+}
+
+.tag-label-color {
+  padding: 4px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  margin: 1px;
+}
+
+.tag-label-without-color {
+  padding: 4px 12px;
+  border-radius: 12px;
+  display: inline-block;
+  margin: 1px;
+  border: 1px solid #bbbbbb !important;
+  margin-right: 5px;
+}
+
+.tag-label-color a {
+  color: white;
+}
+
+table.list tr.issue .tag-label-color a,
+.tags .tag-label-color a,
+.issue .tag-label-color a {
+  color: inherit;
+}
+
+tr.issue td.tags {
+  text-align: left;
+  white-space: normal;
+}
+
+div.tags .tag-nube-1 {
+  font-size: .8em;
+}
+
+div.tags .tag-nube-2 {
+  font-size: .9em;
+}
+
+div.tags .tag-nube-3 {
+  font-size: 1em;
+}
+
+div.tags .tag-nube-4 {
+  font-size: 1.1em;
+}
+
+div.tags .tag-nube-5 {
+  font-size: 1.2em;
+}
+
+div.tags .tag-nube-6 {
+  font-size: 1.3em;
+}
+
+div.tags .tag-nube-7 {
+  font-size: 1.4em;
+}
+
+div.tags .tag-nube-8 {
+  font-size: 1.5em;
+}
+
+.tag-count {
+  font-size: .75em;
+  margin-left: .5em;
+}
+
+/* tag-it (vendored third-party widget) — overridden here, never edited directly,
+   same convention as the ecosystem's MultiSelect.css overrides. */
+ul.tagit {
+  border: 1px solid var(--rf-border-input);
+  -moz-border-radius: 6px;
+  -webkit-border-radius: 6px;
+  -khtml-border-radius: 6px;
+  border-radius: 6px;
+  background: white;
+  padding: 0px;
+  margin: 0px;
+  width: 96%;
+  min-height: 40px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+ul.tagit:focus-within {
+  border-color: var(--rf-accent);
+  box-shadow: 0 0 0 3px rgba(0, 148, 255, 0.1);
+}
+
+ul.tagit li.tagit-choice {
+  font-weight: normal;
+  -moz-border-radius: 0px;
+  border-radius: 0px;
+  -webkit-border-radius: 0px;
+  font-size: 11px;
+  color: inherit;
+  padding-top: 0px;
+  padding-bottom: 0px;
+  background-color: #f7f7f7;
+  margin: 1px;
+}
+
+ul.tagit li.tagit-choice:hover,
+ul.tagit li.tagit-choice.remove {
+  background-color: #e5e5e5;
+  text-decoration: none;
+  color: black;
+}
+
+ul.tagit li.tagit-choice a.tagit-close {
+  text-decoration: none;
+}
+
+ul.tagit li.tagit-choice .tagit-close {
+  right: .4em;
+}
+
+ul.tagit li.tagit-choice .ui-icon {
+  display: none;
+}
+
+ul.tagit li.tagit-choice .tagit-close .text-icon {
+  display: inline;
+  line-height: 16px;
+
+}
+
+ul.tagit li.tagit-choice .tagit-close .text-icon:hover {
+  color: black;
+}
+
+ul.tagit li.tagit-new input {
+  font-size: 11px;
+  background: white;
+}
+
+ul.tagit li.tagit-new {
+  padding: 0;
+  margin: 0;
+}
+
+ul.tagit {
+  width: auto !important;
+}
+
+button.btn-btn-info {
+  margin-left: 5px;
+}
+
+/* bulk delete pop-up (issue context menu — distinct from the Manage Tags
+   delete-confirmation modal above) */
+.custom-menu {
+  display: none;
+  z-index: 1000;
+  position: absolute;
+  overflow: hidden;
+  border: 1px solid #CCC;
+  white-space: nowrap;
+  font-family: sans-serif;
+  background: #FFF;
+  color: #333;
+  border-radius: 5px;
+  padding: 0;
+}
+
+.custom-menu li {
+  padding: 8px 12px;
+  cursor: pointer;
+  list-style-type: none;
+  transition: all .3s ease;
+  user-select: none;
+}
+
+.custom-menu li:hover {
+  background-color: #DEF;
+}
+
+.ui-widget.ui-widget-content {
+  padding: 5px !important;
+}
+
+.tag_box {
+  background-color: #fff8f800 !important;
+  display: inline-flex;
+  width: 90%;
+  margin: 4px 8px 3px 0 !important;
+}
+
+/* Select2 (vendored third-party widget, bulk-edit tags field only) —
+   height/border/radius/focus-ring aligned to the shared form standard;
+   internal Select2 layout/positioning is left untouched. flux_tags.css loads
+   on every Redmine page (view_layouts_base_html_head hook), so this is
+   scoped to the #common_tags field by ID rather than the generic
+   .select2-container class, which could otherwise restyle an unrelated
+   Select2 dropdown belonging to core Redmine or another plugin. */
+#common_tags + .select2-container .select2-selection--multiple {
+  min-height: 40px;
+  border: 1px solid var(--rf-border-input) !important;
+  border-radius: var(--rf-radius-sm) !important;
+}
+
+#common_tags + .select2-container.select2-container--default.select2-container--focus .select2-selection--multiple {
+  border-color: var(--rf-accent) !important;
+  box-shadow: 0 0 0 3px rgba(0, 148, 255, 0.1);
+}
+
+#issue_tags {
+  width: 90%;
+}
+
+.for_tag {
+  margin-top: 0;
+  margin-left: 8px;
+}
+
+.tagedit_button {
+  padding-right: 8px;
+  margin: 2px;
+  display: inline-flex;
+  gap: 10px;
+  padding-left: 10px;
+}
+
+.value-tag {
+  margin-right: 30px;
+}
+
+.tag_label>span {
+  line-height: 20px;
+}
+
+#tag_name {
+  width: 350px;
+}
+
+span.tag-label {
+  border: 1px solid #bbbbbb !important;
+  border-radius: 12px;
+  margin-right: 5px;
+  padding: 4px 12px;
+}
+
+html[lang="ar"] .tag_box {
+  margin: 4px 0 3px 8px !important;
+  border-color: #ffffdd !important;
+}
+
+html[lang="ar"] .icon.icon-edit.icon-edit-issue,
+html[lang="ar"] .icon.icon-del.icon-del-issue,
+html[lang="ar"] .icon.icon-edit-project.icon-edit,
+html[lang="ar"] .icon.icon-del-project.icon-del,
+html[lang="ar"] .icon.icon-edit.edit-tag.icon-edit-time,
+html[lang="ar"] .icon.icon-del.icon-del-time {
+  padding-right: 2em !important;
+}
+
+html[lang="ar"] .tagit-new .ui-widget-content.ui-autocomplete-input {
+  text-align: left !important;
+}

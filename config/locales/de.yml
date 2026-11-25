@@ -1,0 +1,33 @@
+# German strings go here for Rails i18n
+de:
+  button_add_notes: Notizen hinzufügen
+  label_for_delete_message: "Möchten Sie diese Markierung wirklich löschen?"
+  label_for_delete_tah: "Markierung löschen"
+  add_tags_placeholder: "Markierungen hinzufügen"
+  select_tags_label: "Markierungen auswählen oder hinzufügen"
+  my_label: "Meine Markierung"
+  setting_issue_tags: "Abbrechen"
+  issue_tags_tag: "Markierung bearbeiten"
+  tag_name: "Name der Markierung"
+  field_tags: "Markierungen"
+  field_tag_list: "Markierungsliste"
+  button_add_tags: "Markierungen hinzufügen"
+  button_add_tag: "Markierung hinzufügen"
+  label_edit_tags: "Markierungen bearbeiten"
+
+  label_issue_tags: "Ticket-Markierungen"
+  label_time_entry_tags: "Zeitbuchungs-Markierungen"
+  label_project_tags: "Projekt-Markierungen"
+  label_tags: "Markierungen"
+  label_for_add: "Hinzufügen"
+  label_for_used_color: "Farbige Markierung verwenden"
+  label_delete: "Löschen"
+  label_for_pages: "Seiten: "
+  label_password_entry_tags: "Passwort-Markierungen"
+  text_flux_tags_pm_legacy_tags: "Der Password Manager ist installiert, speichert seine Markierungen aber in eigenen Tabellen. Aktualisieren Sie ihn auf eine Version, die Markierungen mit diesem Plugin teilt, führen Sie die Plugin-Migrationen aus und starten Sie Redmine neu."
+  text_flux_tags_pm_schema_incomplete: "In den Markierungstabellen fehlt: %{details}. Führen Sie die Plugin-Migrationen aus und starten Sie Redmine neu."
+  error_flux_tags_name_too_long_for_password_tags: "ist zu lang für eine Markierung an Passworteinträgen (maximal %{count} Zeichen)"
+
+  tags:
+    delete_success: "Markierung erfolgreich gelöscht"
+    delete_failure: "Markierung nicht gefunden"

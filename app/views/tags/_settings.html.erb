@@ -1,0 +1,64 @@
+<%
+  tags_tabs = [
+    {
+      name:    'general',
+      partial: 'tags/general',
+      label:   :label_general
+    },
+    # {
+    #   name:    'manage_tags', 
+    #   partial: 'tags/manage_tags',
+    #   label:   :issue_tags_manage_tags
+    # },
+
+    {
+      name:    'issue',
+      partial: 'tags/issue_tags',
+      label:   :label_issue_tags
+    },
+    {
+      name:    'time_entry',
+      partial: 'tags/time_entry_tags',
+      label:   :label_time_entry_tags
+    },
+    {
+      name:    'project',
+      partial: 'tags/project_tags',
+      label:   :label_project_tags
+    }
+  ]
+  # rtg-010: the Password Manager's tags, only when that plugin is installed.
+  if FluxTags::PasswordTags.installed?
+    tags_tabs << {
+      name:    FluxTags::PasswordTags::TAB,
+      partial: 'tags/password_entry_tags',
+      label:   :label_password_entry_tags
+    }
+  end
+
+%>
+<% html_title l(:label_settings), l(:label_tags) %>
+<%= render_tabs tags_tabs %>
+<script>
+  window.fluxTagsUseSpriteIcons = <%= rf_sprite_icons_available? ? 'true' : 'false' %>;
+  window.fluxTagsIconsSpritePath = "<%= asset_path('icons.svg') %>";
+</script>
+
+<div id="tag-overloay" class="rtg-delete-modal-overlay"></div>
+<div class="rtg-delete-modal" id="delete-email-template">
+  <div class="rtg-delete-icon-circle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <polyline points="3 6 5 6 21 6"></polyline>
+      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+      <path d="M10 11v6"></path>
+      <path d="M14 11v6"></path>
+      <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path>
+    </svg>
+  </div>
+  <h3 class="rtg-delete-modal-title"><%= l(:label_for_delete_tah) %></h3>
+  <p class="rtg-delete-modal-description"><%= l(:label_for_delete_message) %></p>
+  <div class="rtg-delete-modal-actions">
+    <button type="button" class="rtg-btn rtg-btn-secondary" onclick="closeDeleteTagModal()"><%= l(:setting_issue_tags) %></button>
+    <button type="button" class="rtg-btn rtg-btn-danger" id="confirm-delete"><%= l(:label_delete) %></button>
+  </div>
+</div>

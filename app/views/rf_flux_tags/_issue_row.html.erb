@@ -1,0 +1,33 @@
+<%# The Tags row of the issue page: chips, and a small editor for people who may change them. %>
+<% can_edit = RfFluxTags::IssueTags.allowed?(issue) %>
+<div class="rf-flux-tags-row" id="rf-flux-tags-issue-row"
+     <% if can_edit %>
+       data-rf-flux-tags-issue="<%= issue.id %>"
+       data-url="<%= rf_flux_tags_issue_tags_path(issue) %>"
+       data-history-selector="#history"
+     <% end %>>
+  <div class="rf-flux-tags-row__label"><%= l(:label_tags) %></div>
+  <div class="rf-flux-tags-row__body">
+    <div class="rf-flux-tags-row__view">
+      <span class="rf-flux-tags-chips" data-rf-flux-tags-chips><%= render partial: 'rf_flux_tags/chips', locals: { issue: issue } %></span>
+      <% if can_edit %>
+        <button type="button" class="rf-flux-tags-icon-btn rf-flux-tags-icon-btn--ghost" data-rf-flux-tags-edit
+                title="<%= l(:rf_flux_tags_edit_tags) %>" aria-label="<%= l(:rf_flux_tags_edit_tags) %>">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+      <% end %>
+    </div>
+    <% if can_edit %>
+      <div class="rf-flux-tags-row__edit" data-rf-flux-tags-editor hidden>
+        <%= text_field_tag 'rf_flux_tags_issue_tag_list', issue.tag_list.to_s, id: 'rf_flux_tags_issue_tag_list',
+                           autocomplete: 'off', maxlength: 4000,
+                           data: rf_flux_tags_input_data('issue', issue) %>
+        <div class="rf-flux-tags-row__buttons">
+          <button type="button" class="rf-flux-tags-btn rf-flux-tags-btn--primary rf-flux-tags-btn--compact" data-rf-flux-tags-save><%= l(:button_save) %></button>
+          <button type="button" class="rf-flux-tags-btn rf-flux-tags-btn--compact" data-rf-flux-tags-cancel><%= l(:button_cancel) %></button>
+          <span class="rf-flux-tags-row__message" data-rf-flux-tags-message role="status"></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>

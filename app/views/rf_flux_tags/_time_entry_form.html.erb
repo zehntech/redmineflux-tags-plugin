@@ -1,0 +1,8 @@
+<%# Tags field of the log time form. %>
+<% if User.current.admin? || User.current.allowed_to?(:manage_time_entries_tags, time_entry.project || @project, global: time_entry.project.nil? && @project.nil?) %>
+  <p class="rf-flux-tags-form-field">
+    <%= form.text_field :tag_list, size: 20, value: time_entry.tag_list.to_s, id: 'time_entry_tag_list',
+                        label: l(:field_tags), autocomplete: 'off',
+                        data: rf_flux_tags_input_data('time_entry', time_entry) %>
+  </p>
+<% end %>

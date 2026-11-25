@@ -1,0 +1,8 @@
+<%# Tags field of the new / edit project form. %>
+<% if User.current.admin? || User.current.allowed_to?(:manage_project_tags, nil, global: true) %>
+  <p class="rf-flux-tags-form-field">
+    <%= form.text_field :tag_list, size: 20, value: project.tag_list.to_s, id: 'project_tag_list',
+                        label: l(:field_tags), autocomplete: 'off',
+                        data: rf_flux_tags_input_data('project', project) %>
+  </p>
+<% end %>

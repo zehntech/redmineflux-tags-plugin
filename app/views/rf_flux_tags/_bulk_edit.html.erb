@@ -1,0 +1,27 @@
+<%# Add / remove tags on the selected issues (issue list > right click > Edit). %>
+<% projects = Array(@projects).presence || [@project].compact %>
+<% allowed = User.current.admin? ||
+             (projects.any? && projects.all? { |project| User.current.allowed_to?(:manage_issues_tags, project) }) %>
+<% if allowed %>
+  <% on_all = Array(@issues).map { |issue| issue.tags.to_a }.reduce { |memo, tags| memo & tags } || [] %>
+  <fieldset class="rf-flux-tags-bulk">
+    <legend><%= l(:field_tags) %></legend>
+    <% if on_all.any? %>
+      <p class="rf-flux-tags-bulk__existing">
+        <span class="rf-flux-tags-bulk__label"><%= l(:rf_flux_tags_bulk_on_all) %></span>
+        <%= rf_flux_tags_chips(on_all, link: false) %>
+      </p>
+    <% end %>
+    <p>
+      <label for="rf_flux_tags_add"><%= l(:rf_flux_tags_bulk_add) %></label>
+      <%= text_field_tag 'rf_flux_tags_add', '', id: 'rf_flux_tags_add', autocomplete: 'off',
+                         data: rf_flux_tags_input_data('issue') %>
+    </p>
+    <p>
+      <label for="rf_flux_tags_remove"><%= l(:rf_flux_tags_bulk_remove) %></label>
+      <%= text_field_tag 'rf_flux_tags_remove', '', id: 'rf_flux_tags_remove', autocomplete: 'off',
+                         data: rf_flux_tags_input_data('issue', nil, placeholder: l(:rf_flux_tags_bulk_remove)) %>
+      <em class="info"><%= l(:rf_flux_tags_bulk_remove_hint) %></em>
+    </p>
+  </fieldset>
+<% end %>

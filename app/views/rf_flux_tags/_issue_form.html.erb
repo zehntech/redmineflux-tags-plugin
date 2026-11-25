@@ -1,0 +1,8 @@
+<%# Tags field of the new / edit issue form. Posts issue[tag_list] as a comma separated list. %>
+<% if User.current.admin? || User.current.allowed_to?(:manage_issues_tags, issue.project) %>
+  <p class="rf-flux-tags-form-field">
+    <%= form.text_field :tag_list, size: 20, value: issue.tag_list.to_s, id: 'issue_tag_list',
+                        label: l(:field_tags), autocomplete: 'off',
+                        data: rf_flux_tags_input_data('issue', issue) %>
+  </p>
+<% end %>

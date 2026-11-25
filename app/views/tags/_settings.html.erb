@@ -1,0 +1,165 @@
+<%# Administration > Plugins > Redmineflux Tags plugin > Configure.
+    General holds the plugin options (saved with Redmine's Apply button); the other tabs are the tag
+    lists, drawn by rf_flux_tags_admin.js from the JSON of RfFluxTagsAdminController. %>
+<%
+  helper_settings = RfFluxTags::DEFAULT_SETTINGS.merge((@settings || {}).to_h.stringify_keys)
+  password_tab = FluxTags::PasswordTags::TAB
+  tabs = [
+    ['general', l(:label_general)],
+    ['issue', l(:label_issue_tags)],
+    ['time_entry', l(:label_time_entry_tags)],
+    ['project', l(:label_project_tags)]
+  ]
+  tabs << [password_tab, l(:label_password_entry_tags)] if FluxTags::PasswordTags.installed?
+  tab_names = tabs.map(&:first)
+  first_tab = tab_names.include?(params[:tab].to_s) ? params[:tab].to_s : 'general'
+  stats = RfFluxTags::TagCatalog.stats
+  password_problem = FluxTags::PasswordTags.installed? ? FluxTags::PasswordTags.problem : nil
+  config = {
+    firstTab: first_tab,
+    tabs: tab_names,
+    stats: stats,
+    extras: RfFluxTags::Schema.extras?,
+    maxName: RfFluxTags::TAG_NAME_MAX,
+    maxDescription: RfFluxTags::DESCRIPTION_MAX,
+    palette: RfFluxTags::Colors::PALETTE,
+    useColors: helper_settings['issues_use_colors'].to_s == '1',
+    urls: {
+      list: rf_flux_tags_admin_tags_path,
+      ids: rf_flux_tags_admin_tag_ids_path,
+      create: rf_flux_tags_admin_tags_path,
+      update: rf_flux_tags_admin_tag_path(':id'),
+      records: rf_flux_tags_admin_tag_records_path(':id'),
+      destroy: rf_flux_tags_admin_tags_path,
+      destroyUnused: rf_flux_tags_admin_unused_tags_path
+    },
+    i18n: rf_flux_tags_i18n,
+    strings: {
+      issue: l(:label_issue_tags), time_entry: l(:label_time_entry_tags),
+      project: l(:label_project_tags), password_entry: l(:label_password_entry_tags)
+    }
+  }
+  sidebar_options = [['list', :rf_flux_tags_sidebar_list], ['colored', :rf_flux_tags_sidebar_colored],
+                     ['none', :rf_flux_tags_sidebar_none]]
+  sidebar_value = helper_settings['rf_flux_tags_sidebar'].to_s == 'cloud' ? 'colored' : helper_settings['rf_flux_tags_sidebar']
+%>
+<% html_title l(:label_settings), l(:label_tags) %>
+
+<div class="rf-flux-tags-admin" id="rf-flux-tags-admin" data-config="<%= config.to_json %>">
+  <div role="tablist" class="rf-flux-tags-tabs" aria-label="<%= l(:label_tags) %>">
+    <% tabs.each do |name, label| %>
+      <button type="button" role="tab" class="rf-flux-tags-tab" id="rf-flux-tags-tab-<%= name %>"
+              data-rf-flux-tags-tab="<%= name %>" aria-controls="rf-flux-tags-panel-<%= name %>"
+              aria-selected="<%= name == first_tab %>">
+        <%= label %>
+        <% unless name == 'general' %><span class="rf-flux-tags-tab__badge" data-rf-flux-tags-badge="<%= name %>"><%= stats[name] %></span><% end %>
+      </button>
+    <% end %>
+  </div>
+
+  <section class="rf-flux-tags-panel" id="rf-flux-tags-panel-general" role="tabpanel"
+           data-rf-flux-tags-panel="general" aria-labelledby="rf-flux-tags-tab-general"
+           <%= 'hidden' unless first_tab == 'general' %>>
+    <div class="rf-flux-tags-stats">
+      <div class="rf-flux-tags-stat"><strong><%= stats['total'] %></strong><span><%= l(:rf_flux_tags_stat_total) %></span></div>
+      <div class="rf-flux-tags-stat"><strong><%= stats['issue'] %></strong><span><%= l(:rf_flux_tags_stat_issues) %></span></div>
+      <div class="rf-flux-tags-stat"><strong><%= stats['time_entry'] %></strong><span><%= l(:rf_flux_tags_stat_time_entries) %></span></div>
+      <div class="rf-flux-tags-stat"><strong><%= stats['project'] %></strong><span><%= l(:rf_flux_tags_stat_projects) %></span></div>
+      <div class="rf-flux-tags-stat rf-flux-tags-stat--warn">
+        <strong><%= stats['unused'] %></strong>
+        <span><%= l(:rf_flux_tags_stat_unused) %>
+          <% if stats['unused'].to_i > 0 %>
+            <button type="button" class="rf-flux-tags-link" data-rf-flux-tags-show-unused><%= l(:rf_flux_tags_view_unused) %></button>
+          <% end %>
+        </span>
+      </div>
+    </div>
+
+    <div class="rf-flux-tags-options">
+      <div class="rf-flux-tags-option">
+        <%= hidden_field_tag 'settings[issues_use_colors]', '0', id: nil %>
+        <label class="rf-flux-tags-switch">
+          <%= check_box_tag 'settings[issues_use_colors]', '1', helper_settings['issues_use_colors'].to_s == '1',
+                            id: 'rf_flux_tags_setting_colors' %>
+          <span class="rf-flux-tags-switch__knob" aria-hidden="true"></span>
+          <span class="rf-flux-tags-switch__text">
+            <strong><%= l(:label_for_used_color) %></strong>
+            <span><%= l(:rf_flux_tags_setting_colors_hint) %></span>
+          </span>
+        </label>
+        <div class="rf-flux-tags-preview" id="rf-flux-tags-preview" aria-label="<%= l(:rf_flux_tags_setting_preview) %>">
+          <% %w[bug feature customer-request release-6.2].each do |name| %>
+            <%= rf_flux_tags_chip(name, link: false) %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="rf-flux-tags-option">
+        <label class="rf-flux-tags-option__title" for="rf_flux_tags_setting_sidebar"><%= l(:rf_flux_tags_setting_sidebar) %></label>
+        <%= select_tag 'settings[rf_flux_tags_sidebar]',
+                       options_for_select(sidebar_options.map { |value, key| [l(key), value] },
+                                          sidebar_value),
+                       id: 'rf_flux_tags_setting_sidebar' %>
+        <span class="rf-flux-tags-hint"><%= l(:rf_flux_tags_setting_sidebar_hint) %></span>
+      </div>
+
+      <div class="rf-flux-tags-option">
+        <label class="rf-flux-tags-option__title" for="rf_flux_tags_setting_sidebar_limit"><%= l(:rf_flux_tags_setting_sidebar_limit) %></label>
+        <%= select_tag 'settings[rf_flux_tags_sidebar_limit]',
+                       options_for_select(RfFluxTags::SIDEBAR_LIMITS, helper_settings['rf_flux_tags_sidebar_limit'].to_i),
+                       id: 'rf_flux_tags_setting_sidebar_limit' %>
+        <span class="rf-flux-tags-hint"><%= l(:rf_flux_tags_setting_sidebar_limit_hint) %></span>
+      </div>
+
+      <div class="rf-flux-tags-option">
+        <%= hidden_field_tag 'settings[rf_flux_tags_sidebar_counts]', '0', id: nil %>
+        <label class="rf-flux-tags-switch">
+          <%= check_box_tag 'settings[rf_flux_tags_sidebar_counts]', '1',
+                            helper_settings['rf_flux_tags_sidebar_counts'].to_s == '1',
+                            id: 'rf_flux_tags_setting_sidebar_counts' %>
+          <span class="rf-flux-tags-switch__knob" aria-hidden="true"></span>
+          <span class="rf-flux-tags-switch__text"><strong><%= l(:rf_flux_tags_setting_sidebar_counts) %></strong></span>
+        </label>
+      </div>
+
+      <div class="rf-flux-tags-option">
+        <%= hidden_field_tag 'settings[rf_flux_tags_sidebar_open_only]', '0', id: nil %>
+        <label class="rf-flux-tags-switch">
+          <%= check_box_tag 'settings[rf_flux_tags_sidebar_open_only]', '1',
+                            helper_settings['rf_flux_tags_sidebar_open_only'].to_s == '1',
+                            id: 'rf_flux_tags_setting_sidebar_open_only' %>
+          <span class="rf-flux-tags-switch__knob" aria-hidden="true"></span>
+          <span class="rf-flux-tags-switch__text">
+            <strong><%= l(:rf_flux_tags_setting_sidebar_open_only) %></strong>
+          </span>
+        </label>
+      </div>
+
+      <div class="rf-flux-tags-option rf-flux-tags-option--apidoc">
+        <div class="rf-flux-tags-option__title"><%= l(:rf_flux_tags_api_docs_title) %></div>
+        <span class="rf-flux-tags-hint"><%= l(:rf_flux_tags_api_docs_hint) %></span>
+        <%= link_to l(:rf_flux_tags_api_docs), '/flux_tags/api_doc', class: 'rf-flux-tags-btn rf-flux-tags-btn--compact rf-flux-tags-apidoc__link',
+                    target: '_blank', rel: 'noopener' %>
+      </div>
+    </div>
+  </section>
+
+  <% %w[issue time_entry project].each do |name| %>
+    <section class="rf-flux-tags-panel" id="rf-flux-tags-panel-<%= name %>" role="tabpanel"
+             data-rf-flux-tags-panel="<%= name %>" data-rf-flux-tags-list="<%= name %>"
+             aria-labelledby="rf-flux-tags-tab-<%= name %>" <%= 'hidden' unless first_tab == name %>></section>
+  <% end %>
+
+  <% if FluxTags::PasswordTags.installed? %>
+    <section class="rf-flux-tags-panel" id="rf-flux-tags-panel-<%= password_tab %>" role="tabpanel"
+             data-rf-flux-tags-panel="<%= password_tab %>"
+             <% unless password_problem %>data-rf-flux-tags-list="<%= password_tab %>"<% end %>
+             aria-labelledby="rf-flux-tags-tab-<%= password_tab %>" <%= 'hidden' unless first_tab == password_tab %>>
+      <% if password_problem %>
+        <p class="warning"><%= l("text_flux_tags_pm_#{password_problem}", details: FluxTags::SharedTagsSchema.problem) %></p>
+      <% end %>
+    </section>
+  <% end %>
+
+  <noscript><p class="warning"><%= l(:rf_flux_tags_needs_javascript) %></p></noscript>
+</div>

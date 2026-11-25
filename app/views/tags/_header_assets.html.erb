@@ -1,0 +1,11 @@
+<%# Style and script of the tag pieces. Only on the pages that show or change tags. %>
+<% if %w[issues projects timelog settings].include?(controller_name) %>
+  <%= stylesheet_link_tag 'rf_flux_tags', plugin: :flux_tags %>
+  <script>
+    window.RfFluxTagsConfig = <%= raw ERB::Util.json_escape({ i18n: rf_flux_tags_i18n }.to_json) %>;
+  </script>
+  <%= javascript_include_tag 'rf_flux_tags', plugin: :flux_tags %>
+  <% if controller_name == 'settings' %>
+    <%= javascript_include_tag 'rf_flux_tags_admin', plugin: :flux_tags %>
+  <% end %>
+<% end %>

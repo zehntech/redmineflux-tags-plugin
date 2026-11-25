@@ -1,0 +1,399 @@
+openapi: 3.0.0
+info:
+  title: Redmineflux Tags API
+  description: |
+    Tags on issues, projects and time entries, and the shared tag library.
+
+    **Authentication.** Send your Redmine API key in the `X-Redmine-API-Key` header
+    (a key in the address is not accepted). Reading is open to every signed-in user and only shows what that
+    user may see. Creating, renaming and deleting tags needs an administrator: they change the tag library
+    shared by every project, so the "Manage tags" role permission does not open them. Changing the tags of a
+    record needs the matching permission (`manage_issues_tags`, `manage_project_tags`,
+    `manage_time_entries_tags`) and the right to edit that record.
+
+    **Responses.** Every response is `{ "success": true, "data": {...} }` or
+    `{ "success": false, "error": { "message": "...", "details": [...] } }`.
+    List endpoints take `page` and `per_page` (default 25, at most 100).
+  version: 2.0.0
+
+servers:
+  - url: "{server_url}"
+    description: This Redmine
+
+tags:
+  - name: Tags
+    description: The shared tag library.
+  - name: Issues
+  - name: Projects
+  - name: Time entries
+  - name: Legacy
+    description: Older administrator endpoints, kept for existing scripts.
+
+security:
+  - apiKey: []
+
+paths:
+  /api/v1/flux_tags/tags:
+    get:
+      tags: [Tags]
+      summary: List tags
+      description: Tags the signed-in user may see, ordered by name.
+      parameters:
+        - name: q
+          in: query
+          description: Only tags whose name contains this text (ignoring case).
+          schema: { type: string }
+        - name: context
+          in: query
+          description: Only tags used on this kind of record.
+          schema: { type: string, enum: [issues, projects, time_entries] }
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        "200":
+          description: A page of tags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      tags:
+                        type: array
+                        items: { $ref: "#/components/schemas/Tag" }
+                      pagination: { $ref: "#/components/schemas/Pagination" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Tags]
+      summary: Create a tag
+      description: Needs an administrator. Returns the existing tag when the name already exists (ignoring case).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 60, example: customer-request }
+      responses:
+        "201":
+          description: The tag
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TagResponse" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/Invalid" }
+
+  /api/v1/flux_tags/tags/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags: [Tags]
+      summary: Get a tag
+      responses:
+        "200":
+          description: The tag
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TagResponse" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Tags]
+      summary: Rename a tag
+      description: Needs an administrator. A name that another tag already has (ignoring case) is refused with 422. `PATCH` works the same.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, maxLength: 60, example: defect }
+      responses:
+        "200":
+          description: The renamed tag
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TagResponse" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Invalid" }
+    delete:
+      tags: [Tags]
+      summary: Delete a tag
+      description: Removes the tag from every record that carries it. Needs an administrator.
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Message" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/flux_tags/tags/{id}/records:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags: [Tags]
+      summary: Where a tag is used
+      description: Records carrying the tag that the signed-in user may see.
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema: { type: string, enum: [issues, projects, time_entries] }
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+      responses:
+        "200":
+          description: A page of records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      tag: { $ref: "#/components/schemas/Tag" }
+                      type: { type: string }
+                      records:
+                        type: array
+                        items: { type: object }
+                      pagination: { $ref: "#/components/schemas/Pagination" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "422": { $ref: "#/components/responses/Invalid" }
+
+  /api/v1/flux_tags/issues/{issue_id}/tags:
+    parameters:
+      - name: issue_id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [Issues]
+      summary: Tags of an issue
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Issues]
+      summary: Replace the tags of an issue
+      description: Needs `manage_issues_tags` in the issue's project. `PATCH` works the same.
+      requestBody: { $ref: "#/components/requestBodies/TagList" }
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/flux_tags/projects/{project_id}/tags:
+    parameters:
+      - name: project_id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [Projects]
+      summary: Tags of a project
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Projects]
+      summary: Replace the tags of a project
+      description: Needs `manage_project_tags`. `PATCH` works the same.
+      requestBody: { $ref: "#/components/requestBodies/TagList" }
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/v1/flux_tags/time_entries/{time_entry_id}/tags:
+    parameters:
+      - name: time_entry_id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [Time entries]
+      summary: Tags of a time entry
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Time entries]
+      summary: Replace the tags of a time entry
+      description: Needs `manage_time_entries_tags` in the entry's project. `PATCH` works the same.
+      requestBody: { $ref: "#/components/requestBodies/TagList" }
+      responses:
+        "200": { $ref: "#/components/responses/Taggable" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /tags/{id}:
+    parameters:
+      - $ref: "#/components/parameters/id"
+    get:
+      tags: [Legacy]
+      summary: Get a tag (administrator)
+      responses:
+        "200":
+          description: The tag
+          content:
+            application/json:
+              schema: { type: object }
+        "404":
+          description: Tag not found
+    put:
+      tags: [Legacy]
+      summary: Rename a tag (administrator)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                tag:
+                  type: object
+                  properties:
+                    name: { type: string }
+      responses:
+        "200":
+          description: Updated
+        "422":
+          description: The name is taken or invalid
+    delete:
+      tags: [Legacy]
+      summary: Delete a tag (administrator)
+      responses:
+        "200":
+          description: Deleted
+        "404":
+          description: Tag not found
+
+components:
+  securitySchemes:
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-Redmine-API-Key
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    per_page:
+      name: per_page
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 100, default: 25 }
+  requestBodies:
+    TagList:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              tag_list:
+                description: Comma separated names, or an array. Replaces the current tags; an empty list removes them all.
+                oneOf:
+                  - type: string
+                  - type: array
+                    items: { type: string }
+                example: "bug, backend"
+  responses:
+    Taggable:
+      description: The record and its tags
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean }
+              data:
+                type: object
+                properties:
+                  taggable: { type: object }
+                  tags:
+                    type: array
+                    items: { $ref: "#/components/schemas/Tag" }
+    Unauthorized:
+      description: API key missing or invalid
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Forbidden:
+      description: Not allowed
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    NotFound:
+      description: Not found
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+    Invalid:
+      description: The request was understood but cannot be done
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+  schemas:
+    Tag:
+      type: object
+      properties:
+        id: { type: integer, example: 12 }
+        name: { type: string, example: bug }
+        taggings_count: { type: integer, example: 48 }
+        contexts:
+          type: array
+          items: { type: string, enum: [issues, projects, time_entries, password_entries] }
+    TagResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            tag: { $ref: "#/components/schemas/Tag" }
+    Message:
+      type: object
+      properties:
+        success: { type: boolean }
+        data:
+          type: object
+          properties:
+            message: { type: string }
+    Pagination:
+      type: object
+      properties:
+        page: { type: integer }
+        per_page: { type: integer }
+        total: { type: integer }
+        pages: { type: integer }
+    Error:
+      type: object
+      properties:
+        success: { type: boolean, example: false }
+        error:
+          type: object
+          properties:
+            message: { type: string }
+            details:
+              type: array
+              items: { type: string }

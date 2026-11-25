@@ -1,0 +1,40 @@
+<%# A few tags in the sidebar of the issue list, and "View all". Set under Administration > Plugins > Tags. %>
+<% style = RfFluxTags.sidebar_style %>
+<% if !@issue && style != 'none' %>
+  <% all_tags = rf_flux_tags_sidebar_tags %>
+  <% if all_tags.any? %>
+    <% tags = all_tags.first(RfFluxTags.sidebar_limit) %>
+    <% show_count = RfFluxTags.setting('rf_flux_tags_sidebar_counts').to_s == '1' %>
+    <% active = rf_flux_tags_active_filter_names %>
+    <% colors = RfFluxTags::Colors.map_for(tags.map(&:name)) %>
+    <div class="rf-flux-tags-sidebar" id="rf-flux-tags-sidebar">
+      <h3><%= l(:rf_flux_tags_sidebar_title) %></h3>
+      <% if style == 'colored' %>
+        <div class="rf-flux-tags-chips rf-flux-tags-sidebar__chips">
+          <% tags.each do |tag| %>
+            <span class="<%= 'is-active' if active.include?(tag.name) %>">
+              <%= rf_flux_tags_chip(tag, color: colors[tag.name], force_color: true,
+                                    count: (tag[:count].to_i if show_count)) %>
+            </span>
+          <% end %>
+        </div>
+      <% else %>
+        <ul class="rf-flux-tags-sidebar__list">
+          <% tags.each do |tag| %>
+            <li class="<%= 'is-active' if active.include?(tag.name) %>">
+              <%= link_to rf_flux_tags_filter_url(tag.name), title: rf_flux_tags_description(tag).presence do %>
+                <span class="rf-flux-tags-sidebar__dot" style="--rf-flux-tags-color: <%= colors[tag.name] %>"></span>
+                <span class="rf-flux-tags-sidebar__name"><%= tag.name %></span>
+                <% if show_count %><span class="rf-flux-tags-sidebar__count"><%= tag[:count] %></span><% end %>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+      <p class="rf-flux-tags-sidebar__all">
+        <%= link_to l(:rf_flux_tags_sidebar_view_all), rf_flux_tags_filter_url(:any) %>
+        <% if all_tags.size > tags.size %><span class="rf-flux-tags-sidebar__count">(<%= all_tags.size %>)</span><% end %>
+      </p>
+    </div>
+  <% end %>
+<% end %>

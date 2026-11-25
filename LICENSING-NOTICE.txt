@@ -1,0 +1,21 @@
+Redmineflux Tags plugin – Licensing Notice
+Zehntech Technologies Inc. · https://www.redmineflux.com
+
+1. The plugin – GNU General Public License, version 2
+   This plugin is free software. All of it – the Ruby and ERB code, the JavaScript,
+   the CSS, the images and the documentation written by Zehntech – is licensed under
+   the GNU General Public License, version 2 (the same licence Redmine uses).
+   The full text is in the file LICENSE. You may use, study, change and share it
+   under the terms of that licence.
+
+2. Third-party components
+   Libraries made by others keep their own licences. They are listed in
+   THIRD-PARTY-NOTICES.md.
+
+3. Name and logo
+   "Redmineflux", the Redmineflux logo and Zehntech product names are trademarks of
+   Zehntech Technologies Inc. The GPL gives no right to use them. You may say that
+   your work is based on or compatible with this plugin, but please do not call a
+   changed or redistributed copy "Redmineflux", or suggest that we endorse it.
+
+Questions: support@redmineflux.com

@@ -1,0 +1,78 @@
+
+<% @time_entry_tags = WillPaginate::Collection.create(params[:time_entry_page] || 1, params[:per_page] || 10, TimeEntry.available_tags.to_a.size) do |pager| %>
+  <% pager.replace(TimeEntry.available_tags.to_a[pager.offset, pager.per_page]) %>
+<% end %>
+ <%=  javascript_include_tag('tags.js', :plugin => :flux_tags) %>
+
+<% if @time_entry_tags.present? %>
+  <div class="rtg-table-section">
+    <div class="rtg-table-container">
+      <table class="rtg-table">
+        <thead>
+          <tr>
+            <th class="rtg-col-checkbox hide-when-print">
+              <%= link_to '#',
+              id: 'toggle-checkbox-time',
+                    onclick: 'tagsCheckboxTime(event); return false;',
+                    title: "#{ l :button_check_all }/#{ l :button_uncheck_all }" do %>
+                <%= rf_toggle_check_icon %>
+              <% end %>
+            </th>
+            <th><%= l(:field_name) %></th>
+            <th class="rtg-col-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @time_entry_tags.each_with_index do |tag, index| %>
+            <tr class="hascontextmenu">
+              <td class="rtg-col-checkbox hide-when-print">
+                <%= check_box_tag 'tag_ids[]', tag.id, false, id: "tag_#{tag.id}", class: 'checkbox_toggle_selection checkbox_toggle_selection_time', id: 'toggle-checkbox' %>
+              </td>
+              <td><%= render_tag_link(tag) %></td>
+              <td class="rtg-col-actions">
+                <div class="rtg-action-buttons">
+                  <%= rf_icon_link(
+                    :edit,
+                    l(:button_edit),
+                    edit_tag_path(tag, tab: 'time_entry'),
+                    class: 'edit-tag icon-edit-time rtg-action-icon rtg-edit-icon',
+                    data: { tag_id: tag.id }
+                  ) %>
+                  <%= rf_icon_link(
+                    :delete,
+                    l(:label_delete),
+                    'javascript:void(0);',
+                    class: 'icon-del-time rtg-action-icon rtg-delete-icon',
+                    onclick: "showCustomConfirm(#{tag.id},'time_entry'); return false;"
+                  ) %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+    <% if @time_entry_tags.total_pages > 1 %>
+      <div class="rtg-pagination">
+        <%= will_paginate @time_entry_tags,renderer: CustomWillPaginateRenderer, param_name: 'time_entry_page', params: { tab: 'time_entry' } %>
+      </div>
+      <%else%>
+      <div class="rtg-pagination">
+        <span class="items">
+          (<%= (@time_entry_tags.current_page - 1) * @time_entry_tags.per_page + 1 %>-<%= (@time_entry_tags.current_page - 1) * @time_entry_tags.per_page + @time_entry_tags.length %>/<%= @time_entry_tags.total_entries %>)
+        </span>
+        <span class="per-page">
+          <%= l(:label_for_pages)%>
+          <% [10, 20, 50].each do |per_page_option| %>
+            <%= per_page_option == params[:per_page].to_i ? content_tag(:span, per_page_option, class: 'selected', style: 'font-weight:bold;') : link_to(per_page_option.to_s, { per_page: per_page_option, tab: 'time_entry' }) %>
+            <%= ',' unless per_page_option == 50 %>
+          <% end %>
+        </span>
+      </div>
+    <%end%>
+  </div>
+<% else %>
+  <div class="rtg-empty-state">
+    <h3><%= l :label_no_data %></h3>
+  </div>
+<% end %>

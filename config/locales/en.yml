@@ -1,0 +1,34 @@
+# English strings go here for Rails i18n
+en:
+  button_add_notes: Add notes
+  label_for_delete_message: "Are you sure you want to delete this tag?"
+  label_for_delete_tah: "Delete Tag"
+  add_tags_placeholder: "Add Tags"
+  select_tags_label: "Select or add tags"
+  my_label: "My label"
+  # issue_tags_manage_tags: "Manage Tags"
+  setting_issue_tags: "Cancel"
+  issue_tags_tag: "Edit Tag"
+  tag_name: "Tag Name"
+  field_tags: "Tags"
+  field_tag_list: "Tag list"
+  button_add_tags: "Add Tags"
+  button_add_tag: "Add Tag"
+  label_edit_tags: "Edit Tags"
+
+  label_issue_tags: "Issue Tags"
+  label_time_entry_tags: "Time Entry Tags"
+  label_project_tags: "Project Tags"
+  label_tags: "Tags"
+  label_for_add: "Add"
+  label_for_used_color: "Use colored tag"
+  label_delete: "Delete"
+  label_for_pages: "Pages: "
+  label_password_entry_tags: "Password Tags"
+  text_flux_tags_pm_legacy_tags: "The Password Manager is installed but keeps its tags in its own tables. Update it to a version that shares tags with this plugin, run the plugin migrations and restart Redmine."
+  text_flux_tags_pm_schema_incomplete: "The tags tables are missing: %{details}. Run the plugin migrations and restart Redmine."
+  error_flux_tags_name_too_long_for_password_tags: "is too long for a tag used on password entries (maximum is %{count} characters)"
+
+  tags:
+    delete_success: "Tag deleted successfully"
+    delete_failure: "Tag not found"
